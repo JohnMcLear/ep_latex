@@ -7,30 +7,29 @@ $.runScript(root+'texlive/website/pdftex.js/release/pdftex.js');
 $.runScript(root+'texlive/website/texlive.js');
 */
 
-exports.documentReady = function(hook, context){
+exports.documentReady = function (hook, context) {
+  const button = $('#compileLatex');
+  let mode = 'compile';
 
-  var button = $('#compileLatex');
-  var mode = 'compile';
-
-  var pdf;
-  button.click(function() {
-    if(mode==='compile') {
+  let pdf;
+  button.click(() => {
+    if (mode === 'compile') {
       button.append('<div id="msg">compiling</div>');
-    
-      var pdftex = new PDFTeX();
 
-      pdftex.on_stdout = function(txt) { }
-      pdftex.on_stderr = function(txt) { }
+      const pdftex = new PDFTeX();
 
-      var texlive = new TeXLive(pdftex);
-      
-      var url = document.URL+'/export/txt';
-      var xhr = new XMLHttpRequest();
+      pdftex.on_stdout = function (txt) { };
+      pdftex.on_stderr = function (txt) { };
+
+      const texlive = new TeXLive(pdftex);
+
+      const url = `${document.URL}/export/txt`;
+      const xhr = new XMLHttpRequest();
       xhr.open('GET', url, false);
 
-      xhr.onreadystatechange = function(ev) {
-        var code = ev.responseText;     
-        texlive.compile(code, root, function(data) {
+      xhr.onreadystatechange = function (ev) {
+        const code = ev.responseText;
+        texlive.compile(code, root, (data) => {
           button.find('#msg').text('click to open');
           pdf = data;
           mode = 'open';
@@ -38,10 +37,9 @@ exports.documentReady = function(hook, context){
       };
 
       xhr.send(null);
-    }
-    else {
-       mode = 'compile';
-       window.open('data:application/pdf;base64,'+window.btoa(pdf));
+    } else {
+      mode = 'compile';
+      window.open(`data:application/pdf;base64,${window.btoa(pdf)}`);
     }
   });
-}
+};
